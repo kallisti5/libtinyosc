@@ -52,9 +52,9 @@
 
   (this is the zlib license)
 */
-
 #ifndef OSCPKT_HH
 #define OSCPKT_HH
+
 
 #ifndef _MSC_VER
 #include <stdint.h>
@@ -74,6 +74,21 @@ namespace oscpkt {
 #if defined(OSCPKT_OSTREAM_OUTPUT) || defined(OSCPKT_TEST)
 #include <iostream>
 #endif
+
+
+#ifdef __BYTE_ORDER__
+	#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+		#define PLATFORM_BIG_ENDIAN 1
+	#else
+		#define PLATFORM_BIG_ENDIAN 0
+	#endif
+#else
+	// Slower performance
+	#warning using runtime endian check
+	#define PLATFORM_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
+#endif
+
+
 namespace oscpkt {
 
 /**
@@ -126,17 +141,11 @@ namespace oscpkt {
 		POD value;
 	};
 
-	inline bool isBigEndian() {	// a compile-time constant would certainly improve performances..
-		PodBytes < int32_t > p;
-		p.value = 0x12345678;
-		return p.bytes[0] == 0x12;
-	}
-
 /** read unaligned bytes into a POD type, assuming the bytes are a little endian representation */
 	template < typename POD > POD bytes2pod(const char *bytes) {
 		PodBytes < POD > p;
 		for (size_t i = 0; i < sizeof(POD); ++i) {
-			if (isBigEndian())
+			if (PLATFORM_BIG_ENDIAN)
 				p.bytes[i] = bytes[i];
 			else
 				p.bytes[i] = bytes[sizeof(POD) - i - 1];
@@ -149,7 +158,7 @@ namespace oscpkt {
 		PodBytes < POD > p;
 		p.value = value;
 		for (size_t i = 0; i < sizeof(POD); ++i) {
-			if (isBigEndian())
+			if (PLATFORM_BIG_ENDIAN)
 				bytes[i] = p.bytes[i];
 			else
 				bytes[i] = p.bytes[sizeof(POD) - i - 1];
