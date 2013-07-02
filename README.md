@@ -1,8 +1,7 @@
 libtinyosc
 ========
 
-A tiny OSC client / server library originally based on oscpkt by Julien Pommier.
-
+A tiny OSC 1.0 client / server library originally based on [OscPkt](http://gruntthepeon.free.fr/oscpkt/ "OscPkt") by Julien Pommier.
 
 What is OSC?
 --------
@@ -24,5 +23,4 @@ libtinyosc is released under the zlib license (as-is)
 
 Additional information
 --------
-*  Originally based on [OscPkt](http://gruntthepeon.free.fr/oscpkt/ "OscPkt")
 *  [OSC Specification](http://opensoundcontrol.org "open sound control")
