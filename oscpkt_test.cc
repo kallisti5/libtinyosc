@@ -21,10 +21,10 @@ using
 	std::cerr;
 
 #ifdef OSCPKT_TEST_UDP
-#include "udp.hh"
+#include "oscudp.hh"
 #endif
 
-#include "oscpkt.hh"
+#include "tinyosc.hh"
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>

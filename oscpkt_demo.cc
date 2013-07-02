@@ -3,8 +3,8 @@
 */
 
 #define OSCPKT_OSTREAM_OUTPUT
-#include "oscpkt/oscpkt.hh"
-#include "oscpkt/udp.hh"
+#include "tinyosc.hh"
+#include "oscudp.hh"
 
 using
 	std::cout;
