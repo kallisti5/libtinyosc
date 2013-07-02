@@ -1,7 +1,7 @@
 libtinyosc
 ========
 
-A tiny OSC 1.0 client / server library originally based on [OscPkt](http://gruntthepeon.free.fr/oscpkt/ "OscPkt") by Julien Pommier.
+A tiny [OSC 1.0](http://opensoundcontrol.org/spec-1_0 "OSC 1.0") client / server library originally based on [OscPkt](http://gruntthepeon.free.fr/oscpkt/ "OscPkt") by Julien Pommier.
 
 What is OSC?
 --------
