@@ -63,7 +63,7 @@ namespace oscpkt {
 			sockaddr_storage ss;	// hold an IPv4 or IPv6 address
 			struct sockaddr sa;
 		} addr_;
-	  public:
+	public:
 		struct sockaddr &addr() {
 			return addr_.sa;
 		} const struct sockaddr &addr() const {
@@ -78,7 +78,7 @@ namespace oscpkt {
 			else if (addr().sa_family == AF_INET6)
 				return sizeof(struct sockaddr_in6);
 			else
-				 return sizeof addr_;
+				return sizeof addr_;
 		} SockAddr() {
 			memset(&addr_, 0, sizeof addr_);
 		} bool empty() const {
@@ -87,21 +87,18 @@ namespace oscpkt {
   /** retrieve the current port number, -1 in case of error */
 			int getPort() const {
 			char servname[512];
-			int err =
-				getnameinfo(&addr_.sa, sizeof addr_, 0, 0, servname,
+			int err = getnameinfo(&addr_.sa, sizeof addr_, 0, 0, servname,
 							sizeof servname, NI_NUMERICSERV);
-			 return (err == 0 ? atoi(servname) : -1);
+			return (err == 0 ? atoi(servname) : -1);
 		}
 		/* convert to a string representation (ip:port) */
 			std::string asString() const {
 			std::string s;
 			if (addr().sa_family) {
 				char hostname[512], servname[512];
-				int err = getnameinfo(&addr_.sa,
-									  sizeof addr_, hostname,
-									  sizeof hostname, servname,
-									  sizeof servname,
-									  NI_NUMERICHOST | NI_NUMERICSERV);
+				int err = getnameinfo(&addr_.sa, sizeof addr_, hostname,
+					sizeof hostname, servname, sizeof servname,
+					NI_NUMERICHOST | NI_NUMERICSERV);
 				if (err == 0) {
 					s = hostname;
 					s += ":";
@@ -112,7 +109,7 @@ namespace oscpkt {
 		}
 
 		friend std::ostream & operator<<(std::ostream & os,
-										 const SockAddr & ip) {
+			const SockAddr & ip) {
 			os << "[";
 			switch (ip.addr().sa_family) {
 			case AF_UNSPEC:
@@ -150,10 +147,10 @@ namespace oscpkt {
 		SockAddr local_addr /* initialised only for bound sockets */ ;
 		SockAddr remote_addr;	/* initialised for connected sockets. Also updated for bound sockets after each datagram received */
 
-		 std::vector < char >buffer;
+		std::vector < char >buffer;
 
 
-		 UdpSocket():handle(-1) {
+		UdpSocket():handle(-1) {
 #ifdef WIN32
 			WSADATA wsa_data;
 			if (WSAStartup(MAKEWORD(2, 2), &wsa_data) != 0) {
@@ -189,20 +186,20 @@ namespace oscpkt {
 		} std::string boundPortAsString() const {
 			char s[512];
 #ifndef _MSC_VER
-			 snprintf(s, 512, "%d", boundPort());
+			snprintf(s, 512, "%d", boundPort());
 #else
-			 _snprintf_s(s, 512, 512, "%d", boundPort());
+			_snprintf_s(s, 512, 512, "%d", boundPort());
 #endif
-			 return s;
+			return s;
 		} int socketHandle() const {
 			return handle;
 		} std::string localHostName() const {
-			/* this stuff is not very nice but this is what liblo does in order to
-			   find out a sensible name for the local host */
+			/*	this stuff is not very nice but this is what liblo does in order
+				to find out a sensible name for the local host */
 			char hostname_buf[512];
 			if (gethostname(hostname_buf, sizeof hostname_buf) != 0)
-				 hostname_buf[0] = 0;
-			 hostname_buf[sizeof hostname_buf - 1] = 0;
+				hostname_buf[0] = 0;
+			hostname_buf[sizeof hostname_buf - 1] = 0;
 			struct hostent *host = gethostbyname(hostname_buf);
 			if (host) {
 				return host->h_name;
@@ -211,9 +208,13 @@ namespace oscpkt {
 		}
 		std::string localHostNameWithPort()const {
 			return (localHostName() + ":") + boundPortAsString();
-		} enum { OPTION_UNSPEC = 0, OPTION_FORCE_IPV4 =
-				1, OPTION_FORCE_IPV6 = 2,
-			OPTION_DEFAULT = OPTION_FORCE_IPV4	// according to liblo's README, using ipv6 sockets causes issues with other non-ipv6 enabled osc software
+		} enum {
+			OPTION_UNSPEC = 0,
+			OPTION_FORCE_IPV4 = 1,
+			OPTION_FORCE_IPV6 = 2,
+			OPTION_DEFAULT = OPTION_FORCE_IPV4
+			// according to liblo's README, using ipv6 sockets causes issues
+			// with other non-ipv6 enabled osc software
 		};
 
   /** open the socket and bind it to a port. Use this when you want to read
@@ -225,11 +226,11 @@ namespace oscpkt {
 
   /** open the socket, and prepare for sending datagrams to the specified host:port */
 		bool connectTo(const std::string & host, const std::string & port,
-					   int options = OPTION_DEFAULT) {
+			int options = OPTION_DEFAULT) {
 			return openSocket(host, port, options);
 		}
-		bool connectTo(const std::string & host, int port, int options =
-					   OPTION_DEFAULT) {
+		bool connectTo(const std::string & host, int port,
+			int options = OPTION_DEFAULT) {
 			return openSocket(host, port, options);
 		}
 
@@ -275,9 +276,8 @@ namespace oscpkt {
 
 			/* now we should be able to read without blocking.. */
 			socklen_t len = (socklen_t) remote_addr.maxLen();
-			int nread =
-				(int) recvfrom(handle, &buffer[0], (int) buffer.size(), 0,
-							   &remote_addr.addr(), &len);
+			int nread = (int) recvfrom(handle, &buffer[0], (int) buffer.size(),
+				0, &remote_addr.addr(), &len);
 			if (nread < 0) {
 				// maybe here we should differentiate EAGAIN/EINTR/EWOULDBLOCK from real errors
 #ifdef WIN32
@@ -288,10 +288,10 @@ namespace oscpkt {
 					char s[512];
 #ifdef _MSC_VER
 					_snprintf_s(s, 512, 512, "system error #%d",
-								WSAGetLastError());
+						WSAGetLastError());
 #else
 					snprintf(s, 512, "system error #%d",
-							 WSAGetLastError());
+						WSAGetLastError());
 #endif
 					setErr(s);
 				}
@@ -344,9 +344,8 @@ namespace oscpkt {
 			do {
 				int res;
 				if (isBound()) {
-					res =
-						sendto(handle, (const char *) ptr, (int) sz, 0,
-							   &addr.addr(), (int) addr.actualLen());
+					res = sendto(handle, (const char *) ptr, (int) sz, 0,
+						&addr.addr(), (int) addr.actualLen());
 				} else {
 					res = send(handle, (const char *) ptr, (int) sz, 0);
 					//        res = write(handle, ptr, sz);
@@ -368,7 +367,7 @@ namespace oscpkt {
 			return (size_t) sent == sz;
 		}
 
-	  private:
+	private:
 		bool openSocket(const std::string & hostname, int port,
 						int options) {
 			char port_string[64];
@@ -399,13 +398,9 @@ namespace oscpkt {
 			hints.ai_socktype = SOCK_DGRAM;	/* Datagram socket */
 			hints.ai_flags = (binding ? AI_PASSIVE : 0);	/* AI_PASSIVE means socket address is intended for bind */
 
-			int err = 0;
+			int err = getaddrinfo(binding ? 0 : hostname.c_str(),
+				port.empty()? 0 : port.c_str(), &hints, &result);
 
-
-			err =
-				getaddrinfo(binding ? 0 : hostname.c_str(),
-							port.empty()? 0 : port.c_str(), &hints,
-							&result);
 			if (err != 0) {
 				setErr(gai_strerror(err));
 				return false;
@@ -420,9 +415,8 @@ namespace oscpkt {
 					continue;
 
 				if (binding) {
-					if (bind
-						(handle, rp->ai_addr,
-						 (socklen_t) rp->ai_addrlen) != 0) {
+					if (bind(handle, rp->ai_addr,
+						(socklen_t)rp->ai_addrlen) != 0) {
 						close();
 					} else {
 						socklen_t len = (socklen_t) local_addr.maxLen();
@@ -433,15 +427,13 @@ namespace oscpkt {
 						break;
 					}
 				} else {
-					if (connect
-						(handle, rp->ai_addr,
-						 (socklen_t) rp->ai_addrlen) != 0) {
+					if (connect(handle, rp->ai_addr,
+						(socklen_t) rp->ai_addrlen) != 0) {
 						close();
 					} else {
-						assert((size_t) rp->ai_addrlen <=
-							   sizeof remote_addr);
+						assert((size_t) rp->ai_addrlen <= sizeof remote_addr);
 						memcpy(&remote_addr.addr(), rp->ai_addr,
-							   rp->ai_addrlen);
+							rp->ai_addrlen);
 						break;
 					}
 				}
@@ -467,7 +459,7 @@ namespace oscpkt {
 		std::string port;
 		std::string path;
 		int err;
-		 Url():err(0) {
+		Url():err(0) {
 		} Url(const std::string & url) {
 			init(url);
 		}
@@ -508,7 +500,6 @@ namespace oscpkt {
 			return true;
 		}
 	};
-
 
 }								// namespace oscpkt
 
