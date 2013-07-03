@@ -1,20 +1,17 @@
 /**
-   Test the robustness of oscpkt.
-
-   build with: 
-
-   g++ -O3 -Wall -W -I. oscpkt/oscpkt_test.cc 
-   cl.exe /Zi /EHsc /I. oscpkt/oscpkt_test.cc 
+	Test the robustness of tinyosc.
  */
+
 
 #define OSCPKT_TEST
 #define OSCPKT_OSTREAM_OUTPUT
 #define OSCPKT_TEST_UDP
 
+
 //define OSCPKT_DEBUG
 #include <iostream>
 void hexdump(std::ostream & os, const void *s_void, size_t sz,
-			 size_t offset = 0);
+	size_t offset = 0);
 using
 	std::cout;
 using
@@ -67,6 +64,7 @@ hexdump(std::ostream & os, const void *s_void, size_t sz, size_t offset)
 	}
 }
 
+
 void
 bintoc(void *s_void, size_t sz)
 {
@@ -81,11 +79,11 @@ bintoc(void *s_void, size_t sz)
 	}
 }
 
+
 void
 basicTests()
 {
-	Message
-		msg;
+	Message msg;
 
 	PacketWriter
 		wr;
@@ -99,19 +97,19 @@ basicTests()
 
 	wr.init().startBundle();
 	wr.addMessage(msg.init("/foo").pushInt32(1000).pushInt32(-1).
-				  pushStr("hello").pushFloat(1.234f).pushFloat(5.678f));
+		pushStr("hello").pushFloat(1.234f).pushFloat(5.678f));
 	wr.endBundle();
 
 	cout << "larger message:\n";
 	hexdump(cout, wr.packetData(), wr.packetSize(), 0);
 	cout << std::endl;
-	assert(wr.packetSize() == 0x3c &&
-		   memcmp(wr.packetData(),
-				  "\x23\x62\x75\x6e\x64\x6c\x65\x00\x00\x00\x00\x00\x00\x00\x00\x01"
-				  "\x00\x00\x00\x28\x2f\x66\x6f\x6f\x00\x00\x00\x00\x2c\x69\x69\x73"
-				  "\x66\x66\x00\x00\x00\x00\x03\xe8\xff\xff\xff\xff\x68\x65\x6c\x6c"
-				  "\x6f\x00\x00\x00\x3f\x9d\xf3\xb6\x40\xb5\xb2\x2d",
-				  wr.packetSize()) == 0);
+	assert(wr.packetSize() == 0x3c
+		&& memcmp(wr.packetData(),
+			"\x23\x62\x75\x6e\x64\x6c\x65\x00\x00\x00\x00\x00\x00\x00\x00\x01"
+			"\x00\x00\x00\x28\x2f\x66\x6f\x6f\x00\x00\x00\x00\x2c\x69\x69\x73"
+			"\x66\x66\x00\x00\x00\x00\x03\xe8\xff\xff\xff\xff\x68\x65\x6c\x6c"
+			"\x6f\x00\x00\x00\x3f\x9d\xf3\xb6\x40\xb5\xb2\x2d",
+			wr.packetSize()) == 0);
 	//bintoc(wr.data(), wr.size());
 	assert(wr.isOk());
 
@@ -151,15 +149,17 @@ basicTests()
 	assert(pr.popMessage() == 0);
 }
 
-uint32_t
-	global_seed = 0;
-static uint32_t
-	prandom_state = 1;
+
+uint32_t global_seed = 0;
+static uint32_t prandom_state = 1;
+
+
 void
 prandom_seed(uint32_t seed)
 {
 	prandom_state = seed + global_seed;
 }
+
 
 uint32_t
 prandom(uint32_t max_val)
@@ -167,6 +167,7 @@ prandom(uint32_t max_val)
 	prandom_state = prandom_state * 1103515245 + 12345;
 	return ((uint32_t) (prandom_state / 65536) % 32768) % max_val;
 }
+
 
 std::string randomString(size_t max_len)
 {
@@ -179,7 +180,14 @@ std::string randomString(size_t max_len)
 	return s;
 }
 
-#define check(ok) do { if (!(ok)) { cerr << "TEST#" << test_number << " FAILED, line " << __LINE__ << ", " << #ok << "\n"; return false; } } while (0)
+
+#define check(ok) \
+	do { \
+		if (!(ok)) { \
+			cerr << "TEST#" << test_number << " FAILED, line " << __LINE__ << ", " << #ok << "\n"; return false; \
+		} \
+	} while (0)
+
 
 bool
 makeRandomTest(int seed, int fuzz = 0, bool verbose = false)
@@ -262,7 +270,7 @@ makeRandomTest(int seed, int fuzz = 0, bool verbose = false)
 	check(wr.isOk());
 
 	std::vector < char >data(wr.packetData(),
-							 wr.packetData() + wr.packetSize());
+		wr.packetData() + wr.packetSize());
 	for (int cnt = 0; cnt < fuzz; ++cnt) {
 		size_t pos = prandom(data.size());
 		switch (prandom(4)) {
@@ -339,6 +347,7 @@ randomTests(int nb_test, bool verbose)
 		cout << "all tests passed !\n";
 }
 
+
 #ifdef OSCPKT_TEST_UDP
 #ifdef HAVE_LIBLO
 #include "lo/lo.h"
@@ -350,9 +359,10 @@ lo_osc_error(int num, const char *msg, const char *path)
 		<< "\": " << msg << "\n";
 }
 
+
 static int
 plop_handler(const char *path, const char *types, lo_arg ** argv,
-			 int argc, void *data, void *)
+	int argc, void *data, void *)
 {
 	(void) path;
 	(void) types;
@@ -363,15 +373,15 @@ plop_handler(const char *path, const char *types, lo_arg ** argv,
 	return 0;
 }
 
+
 void
 libloTest()
 {
 	UdpSocket sock;
 	sock.bindTo(0);
 
-	lo_address loaddr =
-		lo_address_new(sock.localHostName().c_str(),
-					   sock.boundPortAsString().c_str());
+	lo_address loaddr = lo_address_new(sock.localHostName().c_str(),
+		sock.boundPortAsString().c_str());
 	lo_send(loaddr, "/plop", "s", "HELLO FROM LIBLO");
 	bool ok = sock.receiveNextPacket(100);
 	cout << "received packet from liblo ? " << ok << ", send=" << sock.
@@ -404,6 +414,7 @@ libloTest()
 	}
 }
 #endif
+
 
 void
 socketTests()
@@ -474,12 +485,12 @@ socketTests()
 
 
 void
-checkMatch(const char *pattern, const char *test, bool expected_match =
-		   true)
+checkMatch(const char *pattern, const char *test, bool expected_match = true)
 {
-	cout << "doing fullPatternMatch('" << pattern << "', '" << test <<
-		"'), expected result is : " << (expected_match ? "MATCH" :
-										"MISMATCH") << std::endl;
+	cout << "doing fullPatternMatch('" << pattern << "', '" << test
+		<< "'), expected result is : " << (expected_match ? "MATCH" :
+		"MISMATCH") << std::endl;
+
 	bool m = fullPatternMatch(pattern, test);
 	if (!expected_match) {
 		if (m) {
@@ -489,8 +500,8 @@ checkMatch(const char *pattern, const char *test, bool expected_match =
 		}
 	} else {
 		if (!m) {
-			cerr << "unexpected mismatch... " << pattern << " with " <<
-				test << "\n";
+			cerr << "unexpected mismatch... " << pattern << " with "
+				<< test << "\n";
 			assert(0);
 		}
 		std::string tmp(test);
@@ -513,6 +524,7 @@ checkMatch(const char *pattern, const char *test, bool expected_match =
 		}
 	}
 }
+
 
 void
 patternTests()
@@ -537,10 +549,11 @@ patternTests()
 	checkMatch("/*/bar", "/foo/bar");
 	checkMatch("/*o/bar", "/foo/bar");
 	checkMatch("/*/*/*/*a***/*/*/*/*/",
-			   "/foo/bar/foo/barrrr/foo/bar/foo/barrrr/");
+		"/foo/bar/foo/barrrr/foo/bar/foo/barrrr/");
 	checkMatch("/*/*/*/**/*/*/*/*/q",
-			   "/foo/bar/foo/barrrr/foo/bar/foo/barrrr/p", false);
+		"/foo/bar/foo/barrrr/foo/bar/foo/barrrr/p", false);
 }
+
 
 int
 main(int argc, char **argv)
@@ -556,8 +569,8 @@ main(int argc, char **argv)
 		global_seed = atoi(argv[2]);
 		verbose = true;
 	}
-	(void) argc;
-	(void) argv;
+	(void)argc;
+	(void)argv;
 	patternTests();
 #ifdef OSCPKT_TEST_UDP
 	//socketTests();
